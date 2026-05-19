@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планировщик бригад — СЦ Иркутск</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbarInner">
+            <div>
+                <div class="brandTitle">📋 Планировщик бригад — СЦ Иркутск</div>
+                <div class="brandSub">Оптимизация маршрутов · ПАО Ростелеком</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- КАРТА -->
+        <div class="card">
+            <h2>🗺️ Маршруты бригад</h2>
+            <div id="mainMap" style="height:520px; border-radius:12px;"></div>
+            <div id="mapLegend" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- ЗАГРУЗКА ФАЙЛА -->
+        <div class="card">
+            <h2>📁 Загрузка файла</h2>
+            <div class="row">
+                <label>
+                    Файл заданий (.xlsx):
+                    <input type="file" id="fileInput" accept=".xlsx,.xls">
+                </label>
+            </div>
+            <div class="row" style="margin-top:10px; gap:8px; flex-wrap:wrap;">
+                <button id="validateBtn">✅ Проверить файл</button>
+                <button id="processBtn" disabled>🚀 Спланировать</button>
+                <button id="recalcBtn" disabled title="Повторно построить расписание с текущими настройками">🔄 Пересчитать маршрут</button>
+                <button id="appendBtn" disabled title="Добавить задачи к уже построенному расписанию">➕ Дозагрузить задачи</button>
+            </div>
+            <div id="status" class="hint" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- НАСТРОЙКИ -->
+        <div class="card">
+            <h2>⚙️ Настройки</h2>
+            <div class="row">
+                <label>
+                    Количество бригад:
+                    <input type="number" id="brigadeCount" value="8" min="1" max="50">
+                </label>
+                <label>
+                    Дежурная бригада ID:
+                    <input type="text" id="dutyBrigadeId" value="B1">
+                </label>
+                <label>
+                    Загруженность дорог:
+                    <select id="trafficLevel">
+                        <option value="free">Свободно (+0 мин)</option>
+                        <option value="hard" selected>Затруднено (+30 мин)</option>
+                        <option value="jam">Пробки (+60 мин)</option>
+                    </select>
+                </label>
+                <label>
+                    Среднее время доезда (ч):
+                    <input type="number" id="baseTravelHours" value="0.5" step="0.1" min="0.1" max="3">
+                </label>
+                <label>
+                    Мин. процент выполнения:
+                    <input type="number" id="minCompletionRatio" value="0.82" step="0.05" min="0.5" max="1">
+                </label>
+                <label>
+                    Макс. переработка (мин):
+                    <input type="number" id="maxOvertimeMinutes" value="120" step="15" min="0" max="240">
+                </label>
+                <label>
+                    Радиус кластера (км):
+                    <input type="number" id="clusterRadiusKm" value="2.0" step="0.5" min="0.1" max="10">
+                </label>
+                <label>
+                    Фильтр по статусу:
+                    <select id="statusFilter">
+                        <option value="all">Все</option>
+                        <option value="scheduled">Запланированы</option>
+                        <option value="assigned">Назначены</option>
+                        <option value="postponed">Отложены</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <!-- СТАРТОВЫЕ ТОЧКИ БРИГАД -->
+        <div class="card">
+            <h2>📍 Текущие точки бригад</h2>
+            <p class="hint">
+                Выберите, откуда каждая бригада начинает маршрут сейчас. Утром это адрес размещения,
+                после обеда — текущий адрес бригады.
+            </p>
+            <div id="startAddressButtons" class="row" style="gap:8px; flex-wrap:wrap;"></div>
+            <div class="row" style="gap:8px; flex-wrap:wrap; margin-top:10px;">
+                <button type="button" class="btnPreset" onclick="assignSelectedBrigades()">Назначить выбранным</button>
+                <button type="button" class="btnPreset" onclick="clearSelectedBrigades()">Очистить выбранные</button>
+            </div>
+            <div id="brigadeStartList" style="margin-top:12px;"></div>
+        </div>
+
+        <!-- ПРОБОЧНЫЕ ТОЧКИ -->
+        <div class="card">
+            <h2>🚧 Пробочные точки Иркутска</h2>
+            <p class="hint">
+                Добавьте места, где регулярно возникают заторы. Система учтёт задержку,
+                если маршрут бригады проходит ближе 500 м от точки.
+            </p>
+
+            <!-- Предустановленные точки Иркутска -->
+            <div class="row" style="gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                <button class="btnPreset" onclick="addPreset('Глазковский мост', 52.287487, 104.263975, 20)">+ Глазковский мост</button>
+                <button class="btnPreset" onclick="addPreset('Академический мост', 52.260243, 104.282168, 15)">+ Академический мост</button>
+                <button class="btnPreset" onclick="addBothEnds()">+ Байкальская (оба конца)</button>
+
+                <script>
+                function addBothEnds() {
+    // Добавляем метку начала
+                 addPreset('Ул. Байкальская (начало)', 52.254164, 104.339054, 10);
+    // Добавляем метку конца
+                 addPreset('Ул. Байкальская (конец)', 52.263071, 104.313522, 10);
+                      }
+                </script>
+                <button class="btnPreset" onclick="addPreset('Ул. Карла Маркса', 52.280159, 104.282631, 10)">+ Карла Маркса</button>
+            </div>
+
+            <!-- Форма добавления своей точки -->
+            <div class="row bottleneckForm">
+                <label>
+                    Название:
+                    <input type="text" id="bnName" placeholder="напр. Перекрёсток Байкальская/Лермонтова">
+                </label>
+                <label>
+                    Широта (lat):
+                    <input type="number" id="bnLat" placeholder="52.2878" step="0.0001">
+                </label>
+                <label>
+                    Долгота (lon):
+                    <input type="number" id="bnLon" placeholder="104.2903" step="0.0001">
+                </label>
+                <label>
+                    Задержка (мин):
+                    <input type="number" id="bnDelay" value="15" min="1" max="120">
+                </label>
+                <label style="justify-content:flex-end;">
+                    <button onclick="addBottleneckFromForm()" style="margin-top:auto;">➕ Добавить точку</button>
+                </label>
+            </div>
+
+            <div id="bottleneckList" style="margin-top:12px;"></div>
+            <p class="hint" id="bnMapHint">Совет: кликните по карте, чтобы взять координаты точки.</p>
+        </div>
+
+        <!-- НЕРАСПОЗНАННЫЕ ЗАДАЧИ -->
+        <div id="postponedSection" class="card" style="display:none;">
+            <h2>⏰ Не распознанные</h2>
+            <div id="postponedRoot"></div>
+        </div>
+
+        <!-- РЕЗУЛЬТАТ ПО БРИГАДАМ -->
+        <div id="resultRoot"></div>
+
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 10% -10%, rgba(134, 72, 255, 0.12), transparent 60%),
+    radial-gradient(900px 450px at 90% 0%, rgba(255, 110, 199, 0.10), transparent 55%),
+    #f6f7fb;
+  color: #121524;
+}
+
+.topbar {
+  background: linear-gradient(90deg, #5b2cff 0%, #7c3aed 45%, #ff2f92 100%);
+  color: #fff;
+  padding: 18px 0;
+  box-shadow: 0 10px 30px rgba(33, 9, 76, 0.18);
+}
+
+.topbarInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brandTitle { font-weight: 700; letter-spacing: 0.2px; }
+.brandSub   { opacity: 0.9; font-size: 13px; margin-top: 2px; }
+
+.container {
+  max-width: 1100px;
+  margin: 18px auto;
+  padding: 0 16px 40px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 28px rgba(17, 20, 31, 0.07);
+  border: 1px solid rgba(84, 89, 112, 0.12);
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 200px;
+  font-size: 13px;
+  color: rgba(18, 21, 36, 0.85);
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  padding: 8px 10px;
+  border: 1px solid rgba(84, 89, 112, 0.28);
+  border-radius: 10px;
+  outline: none;
+  font-size: 13px;
+  background: #fafafa;
+}
+
+input:focus, select:focus {
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  background: #fff;
+}
+
+button {
+  cursor: pointer;
+  background: linear-gradient(90deg, #5b2cff, #ff2f92);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  transition: opacity 0.15s;
+}
+
+button:hover { opacity: 0.88; }
+
+button:disabled {
+  background: rgba(84, 89, 112, 0.3);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Кнопки пресетов пробок */
+.btnPreset {
+  background: #fff;
+  color: #e63946;
+  border: 1.5px solid #e63946;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.btnPreset:hover {
+  background: #e63946;
+  color: #fff;
+  opacity: 1;
+}
+
+.btnPresetActive {
+  background: #e63946;
+  color: #fff;
+}
+
+.hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(18, 21, 36, 0.6);
+  line-height: 1.5;
+}
+
+.routeBox {
+  margin: 10px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.06), rgba(255, 47, 146, 0.04));
+  border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+.routeMain { font-weight: 700; }
+
+/* Таблицы */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+th, td {
+  border: 1px solid #e0e4ef;
+  padding: 7px 8px;
+  text-align: left;
+}
+
+th {
+  background: rgba(124, 58, 237, 0.07);
+  font-weight: 600;
+}
+
+.stickyTable {
+  max-height: 360px;
+  overflow: auto;
+  display: block;
+}
+
+.stickyTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.stickyTable th:first-child,
+.stickyTable td:first-child,
+.stickyTable th:nth-child(2),
+.stickyTable td:nth-child(2) {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+.stickyTable th:nth-child(2),
+.stickyTable td:nth-child(2) {
+  left: 38px;
+}
+
+.stickyTable thead th:first-child,
+.stickyTable thead th:nth-child(2) {
+  background: #f4edff;
+  z-index: 3;
+}
+
+/* Строки с нарушением SLA */
+tr.rowBreach td {
+  background: rgba(230, 57, 70, 0.06);
+  color: #c62828;
+}
+
+tr.rowCritical td {
+  background: rgba(230, 57, 70, 0.04);
+  color: #b71c1c;
+  font-weight: 600;
+}
+
+tr.rowWarning td {
+  background: rgba(46, 125, 50, 0.06);
+  color: #1b5e20;
+}
+
+tr.rowMissingStart td {
+  background: rgba(230, 57, 70, 0.04);
+}
+
+tr.selectedRouteRow td {
+  background: rgba(42, 157, 143, 0.12);
+  font-weight: 700;
+}
+
+#mapLegend tbody tr {
+  cursor: pointer;
+}
+
+#mapLegend tbody tr:hover td {
+  background: rgba(42, 157, 143, 0.08);
+}
+
+.missingText {
+  color: #c62828;
+  font-weight: 600;
+}
+
+/* Форма пробочных точек */
+.bottleneckForm {
+  background: rgba(124, 58, 237, 0.04);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed rgba(124, 58, 237, 0.2);
+  margin-top: 10px;
+}
